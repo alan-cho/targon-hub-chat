@@ -82,23 +82,30 @@ export const createAccount = async ({
     metadata: { user_id: userId },
   });
 
-  let hashedPassowrd = null;
+  let hashedPassword = null;
   if (password) {
-    hashedPassowrd = await new Scrypt().hash(password);
+    hashedPassword = await new Scrypt().hash(password);
   }
-  const res = await db.insert(User).values({
-    pubId: userId,
-    email,
-    googleId,
-    stripeCustomerId: stripeId.id,
-    password: hashedPassowrd,
-    verified: !hashedPassowrd,
-  });
+  const res = await db
+    .insert(User)
+    .values({
+      pubId: userId,
+      email,
+      googleId,
+      stripeCustomerId: stripeId.id,
+      password: hashedPassword,
+      verified: !hashedPassword,
+    })
+    .$returningId();
+
+  const insertedId = res[0]?.id;
+  if (!insertedId) throw new Error("Failed to Create User");
+
   const apiKey = genId.apikey();
   await db.insert(ApiKey).values({
-    userId: parseInt(res.insertId),
+    userId: insertedId,
     key: apiKey,
     name: "Default",
   });
-  return parseInt(res.insertId);
+  return insertedId;
 };

@@ -1,18 +1,17 @@
 import { eq, lte } from "drizzle-orm";
 import type { InferSelectModel } from "drizzle-orm";
-import { type PlanetScaleDatabase } from "drizzle-orm/planetscale-serverless";
+import type { MySql2Database } from "drizzle-orm/mysql2";
 import type { Adapter, DatabaseSession, DatabaseUser } from "lucia";
 
 import type { Session, User } from "./schema";
 
 export class LuciaAdapter implements Adapter {
-  private db: PlanetScaleDatabase;
-
+  private db: MySql2Database;
   private sessionTable: typeof Session;
   private userTable: typeof User;
 
   constructor(
-    db: PlanetScaleDatabase,
+    db: MySql2Database,
     sessionTable: typeof Session,
     userTable: typeof User,
   ) {
