@@ -3,6 +3,7 @@ import { type inferRouterInputs, type inferRouterOutputs } from "@trpc/server";
 
 import { createCallerFactory, createTRPCRouter } from "@/server/api/trpc";
 import { accountRouter } from "./account";
+import { conversationRouter } from "./conversation";
 import { coreRouter } from "./core";
 import { creditsRouter } from "./credits";
 import { modelRouter } from "./model";
@@ -18,6 +19,7 @@ export const appRouter = createTRPCRouter({
   credits: creditsRouter,
   core: coreRouter,
   model: modelRouter,
+  conversation: conversationRouter,
 });
 
 export type ReactQueryOptions = inferReactQueryProcedureOptions<AppRouter>;

@@ -175,11 +175,10 @@ export const Conversation = mysqlTable("conversation", {
   })
     .notNull()
     .references(() => User.id, { onDelete: "cascade" }),
-  pubId: varchar("pubId", { length: 32 }).unique().notNull(),
+  title: varchar("title", { length: 300 }),
   createdAt: timestamp("created_at", { mode: "date" })
     .default(sql`CURRENT_TIMESTAMP`)
     .notNull(),
-  title: varchar("title", { length: 300 }),
 });
 
 export const Message = mysqlTable("message", {
@@ -190,9 +189,9 @@ export const Message = mysqlTable("message", {
   })
     .notNull()
     .references(() => Conversation.id, { onDelete: "cascade" }),
+  sender: mysqlEnum("sender", ["user", "assistant"]).notNull(),
   message: varchar("message", { length: 4000 }),
   createdAt: timestamp("created_at", { mode: "date" })
     .default(sql`CURRENT_TIMESTAMP`)
     .notNull(),
-  sender: mysqlEnum("sender", ["user", "bot"]).notNull(),
 });
