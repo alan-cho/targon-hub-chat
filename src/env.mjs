@@ -11,7 +11,6 @@ export const env = createEnv({
     GOOGLE_CLIENT_ID: z.string(),
     GOOGLE_REDIRECT_URI: z.string(),
 
-
     DATABASE_HOST: z.string(),
     DATABASE_NAME: z.string(),
     DATABASE_USERNAME: z.string(),
@@ -27,6 +26,7 @@ export const env = createEnv({
   client: {
     NEXT_PUBLIC_HUB_API_ENDPOINT: z.string(),
     NEXT_PUBLIC_DEPOSIT_ADDRESS: z.string(),
+    NEXT_PUBLIC_HF_API_KEY: z.string(),
   },
 
   runtimeEnv: {
@@ -45,6 +45,7 @@ export const env = createEnv({
     STRIPE_ENDPOINT_SECRET: process.env.STRIPE_ENDPOINT_SECRET,
     NEXT_PUBLIC_HUB_API_ENDPOINT: process.env.NEXT_PUBLIC_HUB_API_ENDPOINT,
     VERCEL_URL: process.env.VERCEL_ENV ?? "http://localhost:3000",
+    NEXT_PUBLIC_HF_API_KEY: process.env.NEXT_PUBLIC_HF_API_KEY,
   },
 
   skipValidation: !!process.env.SKIP_ENV_VALIDATION,

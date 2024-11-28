@@ -155,7 +155,7 @@ export const modelRouter = createTRPCRouter({
         })
         .from(Model)
         .where(eq(Model.name, input.model));
-      return model
+      return model;
     }),
   getRequiredGpus: publicAuthlessProcedure
     .input(z.string())
@@ -375,8 +375,8 @@ export const modelRouter = createTRPCRouter({
         : null,
       immunityEnds: model.enabledDate
         ? new Date(
-          new Date(model.enabledDate).getTime() + 7 * 24 * 60 * 60 * 1000,
-        ).toLocaleDateString()
+            new Date(model.enabledDate).getTime() + 7 * 24 * 60 * 60 * 1000,
+          ).toLocaleDateString()
         : null,
     }));
   }),

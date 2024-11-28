@@ -28,7 +28,9 @@ export default function Example() {
   const [chats, setChats] = useState<Array<ChatCompletionMessageParam>>([]);
   const models = reactClient.model.getActiveChatModels.useQuery();
   const keys = reactClient.core.getApiKeys.useQuery();
-  const first_key = keys.data?.[0]?.key ?? "";
+  // Added Key for Personal Development
+  const first_key = env.NEXT_PUBLIC_HF_API_KEY;
+  // const first_key = keys.data?.[0]?.key ?? "";
   const client = useMemo(() => {
     return new OpenAI({
       baseURL: env.NEXT_PUBLIC_HUB_API_ENDPOINT + "/v1",
@@ -77,11 +79,10 @@ export default function Example() {
   }
 
   return (
-    <div>
-      {/* Left Sidebar */}
-      <div>
-        <PlaygroundSidebar />
-      </div>
+    <div className="flex h-full">
+      {/* Sidebar */}
+      <PlaygroundSidebar />
+
       {/* Main Content */}
       <div className="relative mx-auto flex h-full max-h-full max-w-2xl flex-grow flex-col justify-between gap-1 overflow-hidden px-5 pb-4 pt-12">
         <div>
@@ -136,7 +137,13 @@ export default function Example() {
                   key={i}
                   className={`${c.role === "user" ? "place-self-end" : "place-self-start"} space-y-2`}
                 >
-                  <div className={`rounded-2xl bg-white px-5`}>
+                  <div
+                    className={`max-w-[100%] rounded-2xl px-4 py-2 text-sm ${
+                      c.role === "user"
+                        ? "self-end bg-orange-600 text-white"
+                        : "self-start bg-gray-200 text-gray-900"
+                    }`}
+                  >
                     <Markdown>{c.content as string}</Markdown>
                   </div>
                 </div>
@@ -173,8 +180,8 @@ export default function Example() {
           </button>
         </div>
       </div>
+      {/* Spacer Div to Center Chat */}
+      <div className="w-64 flex-shrink-0"></div>
     </div>
   );
 }
-/*
- * */
