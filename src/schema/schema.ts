@@ -166,3 +166,28 @@ export const Model = mysqlTable("model", {
   supportedEndpoints: json("supported_endpoints").notNull().$type<string[]>(),
   enabledDate: timestamp("enabled_date", { mode: "date" }),
 });
+
+export const Conversation = mysqlTable("conversation", {
+  id: serial("id").primaryKey(),
+  userId: bigint("user_id", {
+    unsigned: true,
+    mode: "number",
+  })
+    .notNull()
+    .references(() => User.id, { onDelete: "cascade" }),
+  createdAt: timestamp("created_at", { mode: "date" }),
+  title: varchar("title", { length: 300 }),
+});
+
+export const Message = mysqlTable("message", {
+  id: serial("id").primaryKey(),
+  conversationId: bigint("conversation_id", {
+    unsigned: true,
+    mode: "number",
+  })
+    .notNull()
+    .references(() => Conversation.id, { onDelete: "cascade" }),
+  message: varchar("message", { length: 4000 }),
+  createdAt: timestamp("created_at", { mode: "date" }),
+  sender: mysqlEnum("sender", ["user", "bot"]).notNull(),
+});
