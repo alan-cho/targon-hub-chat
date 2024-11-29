@@ -1,5 +1,6 @@
 "use client";
 
+import { totalmem } from "os";
 import { useCallback, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 import {
@@ -13,6 +14,7 @@ import { CheckIcon, ChevronsUpDownIcon, SendHorizonalIcon } from "lucide-react";
 import OpenAI from "openai";
 import { type ChatCompletionMessageParam } from "openai/resources/index.mjs";
 import Markdown from "react-markdown";
+import { toast } from "sonner";
 
 import { env } from "@/env.mjs";
 import { reactClient } from "@/trpc/react";
@@ -26,11 +28,16 @@ export default function Example() {
   const [isLoading, setIsloading] = useState(false);
   const [text, setText] = useState("");
   const [chats, setChats] = useState<Array<ChatCompletionMessageParam>>([]);
+  // const [conversations, setConversations] = useState(
+  //   reactClient.conversation.getConversations.useQuery(),
+  // );
   const models = reactClient.model.getActiveChatModels.useQuery();
   const keys = reactClient.core.getApiKeys.useQuery();
+
   // Added Key for Personal Development
   const first_key = env.NEXT_PUBLIC_HF_API_KEY;
   // const first_key = keys.data?.[0]?.key ?? "";
+
   const client = useMemo(() => {
     return new OpenAI({
       baseURL: env.NEXT_PUBLIC_HUB_API_ENDPOINT + "/v1",
@@ -39,21 +46,32 @@ export default function Example() {
     });
   }, [first_key]);
   const current_model = selected ?? models.data?.[0]?.name ?? null;
+
   const trigger = useCallback(
     async (chat: string, chatlog: typeof chats) => {
+      // Check if the Conversation Exists:
+      // const currentConversationId = conversationId || (await createConversation());
+      const conversationId = (await createConversation()).conversation?.id;
+      console.log("Conversation ID: ", conversationId);
+
       if (!current_model) return;
       setText("");
       setIsloading(true);
+
       setChats((c) => [...c, { role: "user", content: chat }]);
+      await addMessage(conversationId, chat, "user");
+      let assistantMessage = "";
       const stream = await client.chat.completions.create({
         stream: true,
         messages: [...chatlog, { role: "user", content: chat }],
         model: current_model,
         max_tokens: 1024,
       });
+
       setChats((c) => [...c, { role: "assistant", content: "" }]);
       for await (const chunk of stream) {
         const content = chunk.choices[0]?.delta?.content || "";
+        assistantMessage += content;
         setChats((c) => {
           const cc = structuredClone(c);
           cc[cc.length - 1]!.content =
@@ -61,6 +79,8 @@ export default function Example() {
           return cc;
         });
       }
+
+      await addMessage(conversationId, assistantMessage, "assistant");
       setIsloading(false);
     },
     [client, current_model],
@@ -71,12 +91,64 @@ export default function Example() {
   }
 
   if (keys.data?.length === 0) {
+    a;
     return (
       <div>
         Looks like you dont have any api keys! Go make one and come back
       </div>
     );
   }
+
+  const createConversationMutation =
+    reactClient.conversation.createConversation.useMutation({
+      onSuccess: (conversation) => {
+        console.log("Conversation Created: ", conversation);
+      },
+      onError: (e) => {
+        toast.error(`Failed to Create Conversation: ${e.message}`);
+      },
+    });
+
+  const createConversation = async () => {
+    return await createConversationMutation.mutateAsync({
+      title: "New Chat",
+    });
+  };
+
+  const addMessageMutation = reactClient.conversation.addMessage.useMutation({
+    onSuccess: (message) => {
+      console.log("Message Added: ", message);
+    },
+    onError: (e) => {
+      toast.error(`Failed to Add Message: ${e.message}`);
+    },
+  });
+
+  const addMessage = async (
+    conversationId: number,
+    message: string,
+    sender: "user" | "assistant",
+  ) => {
+    return await addMessageMutation.mutateAsync({
+      conversationId: conversationId,
+      message: message,
+      sender: sender,
+    });
+  };
+
+  // const addMessage = (
+  //   conversationId: number,
+  //   message: string,
+  //   sender: "user" | "assistant",
+  // ) => {
+  //   const mutation = reactClient.conversation.addMessage.useMutation();
+  //   const newMessage = mutation.mutate({
+  //     conversationId: conversationId,
+  //     message: message,
+  //     sender: sender,
+  //   });
+  //   return newMessage;
+  // };
 
   return (
     <div className="flex h-full">
