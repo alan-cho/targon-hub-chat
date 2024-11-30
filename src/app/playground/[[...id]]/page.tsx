@@ -23,7 +23,11 @@ import { useAuth } from "@/app/_components/providers";
 import { env } from "@/env.mjs";
 import { reactClient } from "@/trpc/react";
 
-export default function ConversationPage({ id }: { id: number | null }) {
+export default function ConversationPage({
+  conversationId,
+}: {
+  conversationId: number | null;
+}) {
   const auth = useAuth();
   const router = useRouter();
 
@@ -31,7 +35,6 @@ export default function ConversationPage({ id }: { id: number | null }) {
   const [isLoading, setIsloading] = useState(false);
   const [text, setText] = useState("");
   const [chats, setChats] = useState<Array<ChatCompletionMessageParam>>([]);
-  const [conversationId, setConversationId] = useState<number | null>(id);
 
   // Initialize Client
   const models = reactClient.model.getActiveChatModels.useQuery();
@@ -55,7 +58,7 @@ export default function ConversationPage({ id }: { id: number | null }) {
 
   // Converts the Previous Conversation Messages Typing for OpenAI's Client
   useEffect(() => {
-    if (messages) {
+    if (messages?.length) {
       const convertedMessages: ChatCompletionMessageParam[] = messages.map(
         (msg) => {
           if (msg.sender === "user") {
@@ -70,13 +73,10 @@ export default function ConversationPage({ id }: { id: number | null }) {
           } as ChatCompletionAssistantMessageParam;
         },
       );
+
       setChats(convertedMessages);
     }
   }, [messages]);
-
-  useEffect(() => {
-    setConversationId(id);
-  }, [id]);
 
   const trigger = useCallback(
     async (chat: string, chatlog: typeof chats) => {
@@ -107,7 +107,7 @@ export default function ConversationPage({ id }: { id: number | null }) {
 
       if (!conversationId) {
         const title = await generateTitle(chat, assistantMessage);
-        setConversationId((await createConversation(title)).conversation!.id);
+        conversationId = (await createConversation(title)).conversation!.id;
       }
 
       if (conversationId) {

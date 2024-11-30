@@ -4,7 +4,7 @@ import { useParams } from "next/navigation";
 
 import { reactClient } from "@/trpc/react";
 import PlaygroundSidebar from "../_components/PlaygroundSidebar";
-import ConversationPage from "./[id]/page";
+import ConversationPage from "./[[...id]]/page";
 
 export default function PlaygroundLayout() {
   const { data: conversations } =
@@ -20,7 +20,7 @@ export default function PlaygroundLayout() {
         selectedConversationId={conversationId}
       />
       {/* Main Content */}
-      <ConversationPage id={conversationId} />
+      <ConversationPage conversationId={conversationId} key={conversationId} />
       {/* Spacer Div to Center Chat */}
       <div className="w-64 flex-shrink-0"></div>
     </div>
