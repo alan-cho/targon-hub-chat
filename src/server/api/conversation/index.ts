@@ -1,5 +1,5 @@
 import { TRPCError } from "@trpc/server";
-import { and, desc, eq } from "drizzle-orm";
+import { and, asc, desc, eq } from "drizzle-orm";
 import { z } from "zod";
 
 import { Conversation, Message } from "@/schema/schema";
@@ -53,7 +53,7 @@ export const conversationRouter = createTRPCRouter({
           })
           .from(Message)
           .where(eq(Message.conversationId, input.conversationId))
-          .orderBy(desc(Message.createdAt));
+          .orderBy(asc(Message.createdAt));
 
         return messages ?? [];
       } catch (e) {
@@ -94,7 +94,7 @@ export const conversationRouter = createTRPCRouter({
         .from(Conversation)
         .where(eq(Conversation.id, conversationId));
 
-      return {success: true, conversation: newConversation[0]};
+      return { success: true, conversation: newConversation[0] };
     }),
 
   // Add a Message to the Conversation
