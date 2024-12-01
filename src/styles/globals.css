@@ -107,6 +107,62 @@
   background-color: #78191b;
 }
 
+input[type="range"] {
+  -webkit-appearance: none;
+  appearance: none;
+  background: transparent;
+  cursor: pointer;
+}
+
+/***** Styles for Slider Track *****/
+/***** Chrome, Safari, Opera, and Edge Chromium *****/
+input[type="range"]::-webkit-slider-runnable-track {
+  border-radius: 5px;
+  background: #d1d5db;
+}
+
+/******** Firefox ********/
+input[type="range"]::-moz-range-track {
+  border-radius: 5px;
+  background: #d1d5db;
+  height: 0.5rem;
+}
+
+input[type="range"]::-moz-range-progress {
+  background-color: #f97316;
+  border-radius: 5px;
+  height: 0.5rem;
+}
+
+input[type="range"]::-ms-fill-upper {
+  background-color: #f97316;
+  border-radius: 5px;
+  height: 0.5rem;
+}
+
+input[type="range"]::-ms-fill-lower {
+  background-color: #f97316;
+  border-radius: 5px;
+  height: 0.5rem;
+}
+
+/***** Styles for Slider Thumb *****/
+/***** Chrome, Safari, Opera, and Edge Chromium *****/
+input[type="range"]::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  height: 12px;
+  width: 12px;
+  border-color: #f97316;
+}
+
+/******** Firefox ********/
+input[type="range"]::-moz-range-thumb {
+  -webkit-appearance: none;
+  height: 12px;
+  width: 12px;
+  border-color: #f97316;
+}
+
 .hljs-char.escape_,
 .hljs-link,
 .hljs-params,

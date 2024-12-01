@@ -12,7 +12,6 @@ import {
 import {
   CheckIcon,
   ChevronsUpDownIcon,
-  PlusIcon,
   SendHorizonalIcon,
   TrashIcon,
 } from "lucide-react";
@@ -43,8 +42,8 @@ export default function ConversationPage() {
   const [maxTokens, setMaxTokens] = useState(1024);
   const [topP, setTopP] = useState(0.99);
   const [temperature, setTemperature] = useState(1);
-  const [frequencyPenalty, setFrequencyPenalty] = useState(0.0);
-  const [presencePenalty, setPresencePenalty] = useState(0.0);
+  const [frequencyPenalty, setFrequencyPenalty] = useState(0.01);
+  const [presencePenalty, setPresencePenalty] = useState(0.01);
   const [stopSequence, setStopSequence] = useState<string[]>([]);
 
   const { data: conversations, refetch } =
@@ -223,46 +222,48 @@ export default function ConversationPage() {
   return (
     <div className="flex h-full max-h-full flex-grow">
       <aside className="w-64 flex-shrink-0 border-r border-gray-200 bg-gray-100 p-4 pt-16">
-        <button
-          onClick={() => router.push(`/playground`)}
-          className="mb-2 flex items-center gap-2 rounded-lg px-4 py-2 text-gray-900 hover:bg-orange-400"
-        >
-          <PlusIcon className="h-4 w-4" />
-          <span className="text-sm font-semibold">New Chat</span>
-        </button>
-
-        <h2 className="text-lg font-semibold">Conversations</h2>
-        <ul className="mt-2 max-h-[calc(100vh-100px)] overflow-y-auto">
-          {!conversations
-            ? "Loading..."
-            : conversations.map((conversation) => (
-                <li
-                  key={conversation.id}
-                  className="relative flex items-center"
-                >
-                  <button
-                    className={`w-full truncate rounded-lg px-1 py-1 pl-2 pr-9 ${conversation.id === selectedConversationId ? "bg-gray-500 text-white" : "hover:bg-orange-400"}`}
-                    onClick={() =>
-                      router.push(`/playground/${conversation.id}`)
-                    }
+        <div>
+          <h2 className="flex items-center text-lg font-semibold">
+            Conversations
+          </h2>
+          <ul className="mt-2 max-h-[calc(100vh-100px)] overflow-y-auto">
+            {!conversations
+              ? "Loading..."
+              : conversations.map((conversation) => (
+                  <li
+                    key={conversation.id}
+                    className="relative flex items-center"
                   >
-                    <span
-                      className={`block w-full truncate text-left text-sm ${conversation.id === selectedConversationId ? "text-white" : "text-gray-900"}`}
+                    <button
+                      className={`w-full truncate rounded-lg px-1 py-1 pl-2 pr-9 ${conversation.id === selectedConversationId ? "bg-gray-500 text-white" : "hover:bg-orange-400"}`}
+                      onClick={() =>
+                        router.push(`/playground/${conversation.id}`)
+                      }
                     >
-                      {conversation.title}
-                    </span>
-                  </button>
-                  <button
-                    className={`absolute right-0 rounded-lg p-1 ${conversation.id === selectedConversationId ? "text-gray-200 hover:text-white" : "text-gray-600 hover:text-gray-500"}`}
-                  >
-                    <TrashIcon
-                      className="h-4 w-4"
-                      onClick={() => deleteConversation(conversation.id)}
-                    />
-                  </button>
-                </li>
-              ))}
-        </ul>
+                      <span
+                        className={`block w-full truncate text-left text-sm ${conversation.id === selectedConversationId ? "text-white" : "text-gray-900"}`}
+                      >
+                        {conversation.title}
+                      </span>
+                    </button>
+                    <button
+                      className={`absolute right-0 rounded-lg p-1 ${conversation.id === selectedConversationId ? "text-gray-200 hover:text-white" : "text-gray-600 hover:text-gray-500"}`}
+                    >
+                      <TrashIcon
+                        className="h-4 w-4"
+                        onClick={() => deleteConversation(conversation.id)}
+                      />
+                    </button>
+                  </li>
+                ))}
+          </ul>
+          <button
+            onClick={() => router.push(`/playground`)}
+            className="w-24 items-center justify-center rounded-lg bg-orange-500 p-1 text-center text-sm text-white hover:bg-orange-400"
+          >
+            New Chat
+          </button>
+        </div>
         {/* Model Parameters */}
         <div className="mt-6">
           <div className="mt-2 flex flex-col gap-4">
@@ -317,6 +318,7 @@ export default function ConversationPage() {
               min={0.01}
               max={1.99}
               step={0.01}
+              defaultValue={1}
               onChange={setTemperature}
             />
 
@@ -328,6 +330,7 @@ export default function ConversationPage() {
               min={1}
               max={2048}
               step={1}
+              defaultValue={1024}
               onChange={setMaxTokens}
             />
 
@@ -362,6 +365,7 @@ export default function ConversationPage() {
               min={0.01}
               max={0.99}
               step={0.01}
+              defaultValue={0.99}
               onChange={setTopP}
             />
 
@@ -373,6 +377,7 @@ export default function ConversationPage() {
               min={0.01}
               max={1.99}
               step={0.01}
+              defaultValue={0.01}
               onChange={setFrequencyPenalty}
             />
 
@@ -384,6 +389,7 @@ export default function ConversationPage() {
               min={0.01}
               max={1.99}
               step={0.01}
+              defaultValue={0.01}
               onChange={setPresencePenalty}
             />
           </div>
