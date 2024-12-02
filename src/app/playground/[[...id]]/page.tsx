@@ -42,8 +42,8 @@ export default function ConversationPage() {
   const [maxTokens, setMaxTokens] = useState(1024);
   const [topP, setTopP] = useState(0.99);
   const [temperature, setTemperature] = useState(1);
-  const [frequencyPenalty, setFrequencyPenalty] = useState(0.01);
-  const [presencePenalty, setPresencePenalty] = useState(0.01);
+  const [frequencyPenalty, setFrequencyPenalty] = useState(0);
+  const [presencePenalty, setPresencePenalty] = useState(0);
   const [stopSequence, setStopSequence] = useState<string[]>([]);
 
   const { data: conversations, refetch } =
@@ -107,11 +107,11 @@ export default function ConversationPage() {
         messages: [...chatlog, { role: "user", content: chat }],
         model: current_model,
         max_tokens: maxTokens,
-        temperature: temperature,
-        frequency_penalty: frequencyPenalty,
-        presence_penalty: presencePenalty,
-        top_p: topP,
-        stop: stopSequence,
+        // temperature: temperature,
+        // frequency_penalty: frequencyPenalty,
+        // presence_penalty: presencePenalty,
+        // top_p: topP,
+        // stop: stopSequence,
       });
 
       let assistantMessage = "";
@@ -134,13 +134,47 @@ export default function ConversationPage() {
       }
 
       if (selectedConversationId) {
-        await addMessage(selectedConversationId, chat, "user");
-        await addMessage(selectedConversationId, assistantMessage, "assistant");
+        try {
+          await addMessage(selectedConversationId, chat, "user");
+          await addMessage(
+            selectedConversationId,
+            assistantMessage,
+            "assistant",
+          );
+        } catch (error: unknown) {
+          if (error instanceof Error) {
+            setChats((c) => [
+              ...c,
+              {
+                role: "assistant",
+                content: `Failed to add message: ${error.message}`,
+              },
+            ]);
+          } else {
+            setChats((c) => [
+              ...c,
+              {
+                role: "assistant",
+                content: "An unknown error occurred.",
+              },
+            ]);
+          }
+        }
       }
 
       setIsloading(false);
     },
-    [client, current_model],
+    [
+      client,
+      current_model,
+      temperature,
+      maxTokens,
+      topP,
+      frequencyPenalty,
+      presencePenalty,
+      stopSequence,
+      selectedConversationId,
+    ],
   );
 
   const generateTitle = async (user: string, assistant: string) => {
@@ -165,7 +199,7 @@ export default function ConversationPage() {
   const createConversationMutation =
     reactClient.conversation.createConversation.useMutation({
       onSuccess: (conversation) => {
-        router.replace(`/playground/${conversation.conversation!.id}`);
+        router.push(`/playground/${conversation.conversation!.id}`);
       },
     });
 
@@ -196,7 +230,7 @@ export default function ConversationPage() {
   const deleteConversationMutation =
     reactClient.conversation.deleteConversation.useMutation({
       onSuccess: () => {
-        router.replace("/playground");
+        router.push("/playground");
         toast.info("Conversation successfully deleted");
       },
     });
@@ -206,7 +240,6 @@ export default function ConversationPage() {
       conversationId: id,
     });
     await refetch();
-    return;
   };
 
   if (auth.status === "UNAUTHED") router.push("/sign-in");
@@ -222,50 +255,50 @@ export default function ConversationPage() {
   return (
     <div className="flex h-full max-h-full flex-grow">
       <aside className="w-64 flex-shrink-0 border-r border-gray-200 bg-gray-100 p-4 pt-16">
-        <div>
-          <h2 className="flex items-center text-lg font-semibold">
-            Conversations
-          </h2>
-          <ul className="mt-2 max-h-[calc(100vh-100px)] overflow-y-auto">
-            {!conversations
-              ? "Loading..."
-              : conversations.map((conversation) => (
-                  <li
-                    key={conversation.id}
-                    className="relative flex items-center"
+        <h2 className="flex items-center text-lg font-semibold">
+          Conversations
+        </h2>
+        <ul className="mt-2 max-h-[calc(100vh-100px)] overflow-y-auto">
+          {!conversations
+            ? "Loading..."
+            : conversations.map((conversation) => (
+                <li
+                  key={conversation.id}
+                  className="relative flex items-center"
+                >
+                  <button
+                    className={`w-full truncate rounded-lg px-1 py-1 pl-2 pr-9 ${conversation.id === selectedConversationId ? "bg-gray-500 text-white" : "hover:bg-orange-400"}`}
+                    onClick={() =>
+                      router.push(`/playground/${conversation.id}`)
+                    }
                   >
-                    <button
-                      className={`w-full truncate rounded-lg px-1 py-1 pl-2 pr-9 ${conversation.id === selectedConversationId ? "bg-gray-500 text-white" : "hover:bg-orange-400"}`}
-                      onClick={() =>
-                        router.push(`/playground/${conversation.id}`)
-                      }
+                    <span
+                      className={`block w-full truncate text-left text-sm ${conversation.id === selectedConversationId ? "text-white" : "text-gray-900"}`}
                     >
-                      <span
-                        className={`block w-full truncate text-left text-sm ${conversation.id === selectedConversationId ? "text-white" : "text-gray-900"}`}
-                      >
-                        {conversation.title}
-                      </span>
-                    </button>
-                    <button
-                      className={`absolute right-0 rounded-lg p-1 ${conversation.id === selectedConversationId ? "text-gray-200 hover:text-white" : "text-gray-600 hover:text-gray-500"}`}
-                    >
-                      <TrashIcon
-                        className="h-4 w-4"
-                        onClick={() => deleteConversation(conversation.id)}
-                      />
-                    </button>
-                  </li>
-                ))}
-          </ul>
+                      {conversation.title}
+                    </span>
+                  </button>
+                  <button
+                    className={`absolute right-0 rounded-lg p-1 ${conversation.id === selectedConversationId ? "text-gray-200 hover:text-white" : "text-gray-600 hover:text-gray-500"}`}
+                  >
+                    <TrashIcon
+                      className="h-4 w-4"
+                      onClick={() => deleteConversation(conversation.id)}
+                    />
+                  </button>
+                </li>
+              ))}
+        </ul>
+        <div className="mt-6 flex justify-center">
           <button
             onClick={() => router.push(`/playground`)}
-            className="w-24 items-center justify-center rounded-lg bg-orange-500 p-1 text-center text-sm text-white hover:bg-orange-400"
+            className="w-full items-center justify-center rounded-lg bg-orange-500 p-1 text-center text-sm text-white hover:bg-orange-400"
           >
             New Chat
           </button>
         </div>
         {/* Model Parameters */}
-        <div className="mt-6">
+        <div className="mt-4">
           <div className="mt-2 flex flex-col gap-4">
             <h3 className="text-lg font-semibold">Model Configuration</h3>
 
@@ -315,8 +348,8 @@ export default function ConversationPage() {
               id="temperature"
               label="Temperature"
               value={temperature}
-              min={0.01}
-              max={1.99}
+              min={0}
+              max={2}
               step={0.01}
               defaultValue={1}
               onChange={setTemperature}
@@ -374,10 +407,10 @@ export default function ConversationPage() {
               id={"frequency-penalty"}
               label={"Frequency Penalty"}
               value={frequencyPenalty}
-              min={0.01}
-              max={1.99}
+              min={0}
+              max={2}
               step={0.01}
-              defaultValue={0.01}
+              defaultValue={0}
               onChange={setFrequencyPenalty}
             />
 
@@ -386,10 +419,10 @@ export default function ConversationPage() {
               id={"presence-penalty"}
               label={"Presence Penalty"}
               value={presencePenalty}
-              min={0.01}
-              max={1.99}
+              min={0}
+              max={2}
               step={0.01}
-              defaultValue={0.01}
+              defaultValue={0}
               onChange={setPresencePenalty}
             />
           </div>

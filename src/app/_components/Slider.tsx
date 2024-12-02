@@ -23,7 +23,7 @@ const Slider = ({
   const [localValue, setLocalValue] = useState(value.toFixed(2));
 
   useEffect(() => {
-    if (id === "temperature") {
+    if (id !== "max-tokens") {
       setLocalValue(value.toFixed(2));
     } else {
       setLocalValue(value.toString());
@@ -47,14 +47,13 @@ const Slider = ({
       inputValue = Math.max(min, Math.min(inputValue, max));
     }
 
-    if (id === "temperature") {
+    if (id !== "max-tokens") {
       setLocalValue(inputValue.toFixed(2));
     } else {
-      setLocalValue(inputValue.toString());
+      setLocalValue(Math.round(inputValue).toString());
     }
 
-    setLocalValue(inputValue.toFixed(2));
-    onChange(inputValue);
+    onChange(Math.round(inputValue));
   };
 
   return (
@@ -92,7 +91,7 @@ const Slider = ({
         step={step}
         value={value}
         onChange={(e) => onChange(parseFloat(e.target.value))}
-        className="h-2 w-full"
+        className="h-2 w-full focus:outline-none focus:ring-0"
       />
     </div>
   );
